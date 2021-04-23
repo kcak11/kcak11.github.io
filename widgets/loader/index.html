@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Loader widget</title>
+<meta content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport"/>
+<style type="text/css">
+.highlight{
+    color:red;
+}
+</style>
+</head>
+<body>
+<div style="position:absolute;top:50%;left:50%;margin-top:-100px;margin-left:-210px;text-align:center;width:420px;height:200px;font-family:Verdana;font-size:50px;">
+Loading . . .
+<div id="ldr" style="font-size:20px;"></div>
+</div>
+<script type="text/javascript">
+    var t = document.createElement("span");
+    t.innerHTML = "-";
+    t.style.fontFamily = "arial";
+    t.style.letterSpacing = "-6px";
+    t.style.fontSize = "60px";
+    var ldr = document.getElementById("ldr");
+    for (var i = 0; i < 20; i++) {
+        ldr.appendChild(t.cloneNode(true));
+    }
+    var elems = document.querySelectorAll("#ldr span");
+    var cls = "";
+    function toggleClass() {
+        if (cls === "highlight") {
+            cls = "";
+        } else {
+            cls = "highlight";
+        }
+    }
+    var runLoader = function() {
+        toggleClass();
+        for (var i = 0; i < elems.length; i++) {
+            (function(idx) {
+                setTimeout(function() {
+                    elems[idx].className = cls;
+                    if (idx === elems.length - 1) {
+                        runLoader();
+                    }
+                }, idx * 30);
+            }(i));
+        }
+    };
+    runLoader();
+</script>
+</body>
+</html>

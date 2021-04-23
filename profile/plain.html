@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Profile Picture - kcak11</title>
+    <meta content="width=device-width,initial-scale=1.0" name="viewport" />
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            font-family: Tahoma;
+            background-color: #fff;
+            color: #000;
+        }
+
+        label {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <form onsubmit="return false;">
+        <div id="userInput" style="width: 260px; top: 20px; z-index: 11;">
+            Size: <input type="number" name="picSize" id="picSize" value="100" style="width: 50px; border: 1px solid #000; outline: none;" onblur="setDefaultVal(this);" /> % |
+            <label><input type="radio" name="theme" value="light" onclick="applyTheme(this);" /> Light </label>
+            <label><input type="radio" name="theme" value="dark" checked="checked" onclick="applyTheme(this);" /> Dark</label>
+        </div>
+    </form>
+    <img src="the-k.png" id="theK_Logo" style="width: 400px; height: 400px; z-index: 7;" />
+    <script type="text/javascript">
+        var setDefaultVal = function (elem) {
+            if (!elem.value) {
+                elem.value = "100";
+            }
+        }
+        var applyTheme = function (themeRad) {
+            if (themeRad.value === "dark") {
+                document.getElementById("theK_Logo").src = "the-k.png";
+            } else {
+                document.getElementById("theK_Logo").src = "the-k-light.png";
+            }
+        };
+        var alignHCenter = function (element) {
+            var w = element.offsetWidth;
+            element.style.position = 'absolute';
+            element.style.left = '50%';
+            element.style.marginLeft = ((w / 2) * (-1)) + 'px';
+        };
+        var alignVCenter = function (element) {
+            var w = element.offsetHeight;
+            element.style.position = 'absolute';
+            element.style.top = '50%';
+            element.style.marginTop = ((w / 2) * (-1)) + 'px';
+        };
+        var logoImage = document.getElementById('theK_Logo');
+        alignHCenter(document.getElementById('userInput'));
+        var _cache = null;
+        var adjustProfilePicDimension = function () {
+            var sizeVal = document.getElementById('picSize').value;
+            if (sizeVal === _cache) {
+                return;
+            }
+            logoImage.style.width = logoImage.style.height = (400 * sizeVal / 100) + 'px';
+            alignHCenter(logoImage);
+            alignVCenter(logoImage);
+            _cache = sizeVal;
+        };
+        adjustProfilePicDimension();
+        setInterval(function () {
+            /*This may not be the most performant way, but for now it works for me. Will optimize later.*/
+            adjustProfilePicDimension();
+        }, 200);
+    </script>
+</body>
+
+</html>

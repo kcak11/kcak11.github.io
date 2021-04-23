@@ -1,0 +1,1 @@
+/*Bloghook for Mobile Version*/
