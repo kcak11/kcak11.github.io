@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Stay Awake !!</title>
+<style type="text/css">
+body{font-family:Verdana;font-size:11px;}
+span{display:block;}
+</style>
+</head>
+<body>
+<span>Stay Awake !!</span>
+<span id="appu_container"></span>
+<script type="text/javascript">
+if (('' + window.top.location.href).indexOf('stay=awake') !== - 1) {
+  try {
+    window.close();
+  } catch (exjs) {
+  }
+} else {
+  function stayAlive() {
+    window.open(window.top.location.href + '?stay=awake', 'newwin__');
+    document.querySelectorAll('#appu_container') [0].innerHTML = '@: ' + new Date();
+    document.title = 'Stay Awake @ ' + new Date();
+    setTimeout(function () {
+      stayAlive();
+    }, (2 * 60 * 1000));
+  };
+  stayAlive();
+}
+</script>
+</body>
+</html>

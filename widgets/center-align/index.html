@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Center Aligned Components</title>
+<meta content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport"/>
+<style type="text/css">
+    div{
+        display:inline-block;
+        white-space:nowrap;
+        outline:red solid 2px;
+    }
+</style>
+</head>
+<body>
+<div class="sample" style="outline:none;">
+    <div>This is a sample text</div>
+    <div>This is a sample text</div>
+    <div style="width:400px;">This is a sample text</div>
+    <div>This is a sample text</div>
+    <div>This is a sample text<br/> This is another sample text in the webpage</div>
+    <div style="width:600px;height:40px;">This is a sample text</div>
+    <div style="height:100px;" class="xyz">
+        This is a sample text
+        <div>another sample</div>
+        <div>another sample</div>
+     </div>
+    <div>This is a sample text</div>
+    <div>This is a sample text</div>
+</div>
+<script type="text/javascript">
+    var WebUtil = {};
+    /*  
+         pSelector (@css-selector): Specify the parent element selector here 
+         cSelector (@css-selector): Specify the child element selector here 
+         vgap (@integer => optional): the vertical gap between elements after aligning
+         firstElementTop (@integer => optional): the offset top for the first child
+    */
+    WebUtil.alignCenter = function(pSelector, cSelector, vgap, firstElementTop) {
+        var theSelector = pSelector + ">" + cSelector;
+        var elems = document.querySelectorAll(theSelector);
+        var oTop = (typeof firstElementTop === "number") ? firstElementTop : 10;
+        var vGap = (typeof vgap === "number") ? vgap : 10;
+        for (var i = 0; i < elems.length; i++) {
+            elems[i].dimw = elems[i].offsetWidth;
+            elems[i].dimh = elems[i].offsetHeight;
+            elems[i].style.position = "absolute";
+            elems[i].style.left = "50%";
+            elems[i].style.width = elems[i].dimw + "px";
+            elems[i].style.marginLeft = "-" + (elems[i].dimw / 2) + "px";
+            oTop += (i > 0) ? elems[i - 1].dimh + vGap : 0;
+            elems[i].style.top = oTop + "px";
+        }
+    };
+    /*parentSelector, childSelector, verticalGap*/
+    WebUtil.alignCenter("div.sample", "div", 20);
+    /*parentSelector, childSelector, verticalGap, firstElementTop*/
+    WebUtil.alignCenter(".xyz", "div", 10, 30);
+</script>
+</body>
+</html>
