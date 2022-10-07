@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>TimeZone Planner</title>
+  <link rel="icon" sizes="192x192" href="//www.kcak11.com/assets/images/the-k-circle_192x192.png" />
+  <link rel="apple-touch-icon" sizes="128x128" href="//www.kcak11.com/assets/images/the-k-circle_128x128.png" />
+  <link href='//www.kcak11.com/favicon.ico' rel='icon' type='image/x-icon' />
+  <meta content="https://cdn.kcak11.com/profile/the-k-circle.png" itemprop="image" />
+  <meta content='width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=0' name='viewport' />
+  <meta name="theme-color" content="#6593E4" />
+  <style type="text/css">
+    * {
+      -moz-user-select: -moz-none;
+      -khtml-user-select: none;
+      -webkit-user-select: none;
+      /*
+      Introduced in IE 10.
+      See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+      */
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    body {
+      font-family: Verdana;
+      font-size: 12px;
+      cursor: default;
+    }
+
+    .pageHead {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .tzPlanner {
+      border-spacing: 0px;
+      border-collapse: collapse;
+    }
+
+    .tzPlanner td {
+      border: 1px solid #000;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .tzPlanner td.colHead {
+      background-color: #00a2e8;
+      color: #fff;
+    }
+
+    .tzPlanner .tzLabel {
+      font-size: 10px;
+    }
+
+    .tzPlanner td.standard-nondaylight {
+      font-weight: bold;
+    }
+
+    .tzPlanner td.legend {
+      text-align: right;
+      border: 0px solid #fff;
+      padding-bottom: 5px;
+      font-size: 12px;
+    }
+
+    span.active {
+      font-weight: bold;
+      color: #000;
+    }
+
+    span.inactive {
+      color: #aeaeae;
+    }
+
+    a {
+      color: #00a2e8;
+    }
+
+    span.dayindicator {
+      font-weight: bold;
+      color: #ffa500;
+      font-size: 15px;
+    }
+
+    span.nightindicator {
+      font-weight: bold;
+      color: #0000ff;
+      font-size: 15px;
+    }
+
+    .tzPlanner td.legend span.dayindicator,
+    .tzPlanner td.legend span.nightindicator {
+      font-size: 12px;
+    }
+
+    .tzPlanner td .cellContent {}
+
+    .tzPlanner td.currentTime {
+      background-color: #75ff8c;
+    }
+  </style>
+</head>
+
+<body class="tzInfo">
+  <form name="timezoneForm" id="timezoneForm">
+    <div id="container" style="text-align:center;"></div>
+  </form>
+  <script type="text/javascript" kcak11-script-description="make elements on page unselectable">
+    function makeUnselectable() {
+      try {
+        var elements = document.getElementsByTagName('*');
+        for (var i = 0; i < elements.length; i++) {
+          elements[i].setAttribute('unselectable', 'on');
+        }
+      } catch (exjs) {}
+    }
+    makeUnselectable();
+  </script>
+  <script type="text/javascript">
+    document.oncontextmenu = function(e) {
+      return false;
+    };
+    window.kCommon = {};
+    kCommon.baseDate = new Date();
+    kCommon.baseDate.setHours(0);
+    kCommon.baseDate.setMinutes(0);
+    kCommon.baseDate.setSeconds(0);
+    kCommon.baseTime = kCommon.baseDate.getTime(); /*GMT*/
+    kCommon.second = 1000;
+    kCommon.minute = 60 * kCommon.second;
+    kCommon.hour = 60 * kCommon.minute;
+    kCommon.formatNum = function(num) {
+      return (num < 10) ? "0" + num : num;
+    };
+    kCommon.getIndiaTime = function() {
+      var zoneDateTime = new Date();
+      var zoneOffset = zoneDateTime.getTimezoneOffset();
+      var indiaDateTime = new Date(zoneDateTime.getTime() + ((330 + zoneOffset) * 60000));
+      return {
+        hours: indiaDateTime.getHours(),
+        minutes: indiaDateTime.getMinutes()
+      };
+    };
+    kCommon.displayTime = function(dObj) {
+      var strTime = kCommon.formatNum(dObj.getHours()) + "" + kCommon.formatNum(dObj.getMinutes());
+      var numTime = parseInt(strTime, 10);
+      var symbol = (numTime > 530 && numTime < 1845) ? String.fromCharCode(9788) : String.fromCharCode(9789);
+      var symclass = (numTime > 530 && numTime < 1845) ? "dayindicator" : "nightindicator";
+      return "<span class=\"" + symclass + "\">" + symbol + "</span>" + " " + kCommon.formatNum(dObj.getHours()) + ":" + kCommon.formatNum(dObj.getMinutes());
+    };
+    kCommon.highlightTimeRow = function(trObj) {
+      trObj.style.backgroundColor = "#93deff";
+    };
+    kCommon.unHighlightTimeRow = function(trObj) {
+      trObj.style.backgroundColor = "#fff";
+    };
+    kCommon.getSecondSundayInMarch = function() {
+      var ctr = 0;
+      for (var i = 1; i <= 31; i++) {
+        var dt = new Date();
+        dt.setMonth(2);
+        dt.setDate(i);
+        if (dt.getDay() === 0) {
+          ctr++;
+        }
+        if (ctr == 2) {
+          return dt;
+        }
+      }
+    };
+    kCommon.getFirstSundayInNovember = function() {
+      var ctr = 0;
+      for (var i = 1; i <= 30; i++) {
+        var dt = new Date();
+        dt.setMonth(10);
+        dt.setDate(i);
+        if (dt.getDay() === 0) {
+          ctr++;
+        }
+        if (ctr == 1) {
+          return dt;
+        }
+      }
+    };
+    kCommon.isUSDayLightSavingTime = function() {
+      /* -- Daylight saving time starts on the second Sunday in March and ends on the first Sunday in November -- */
+      var dstTime = false;
+      var currentDate = new Date();
+      var currentMonth = currentDate.getMonth();
+      var currentDay = currentDate.getDay();
+      if (currentMonth > 10 && currentMonth < 2) {
+        dstTime = false;
+      } else if (currentMonth > 2 && currentMonth < 10) {
+        dstTime = true;
+      } else if (currentMonth == 10 || currentMonth == 2) {
+        if (currentMonth == 2) {
+          var secondSundayInMarch = kCommon.getSecondSundayInMarch();
+          if ((new Date()).getDate() < secondSundayInMarch.getDate()) {
+            dstTime = false;
+          } else {
+            dstTime = true;
+          }
+        } else if (currentMonth == 10) {
+          var firstSundayInNovember = kCommon.getFirstSundayInNovember();
+          if ((new Date()).getDate() >= firstSundayInNovember.getDate()) {
+            dstTime = false;
+          } else {
+            dstTime = true;
+          }
+        }
+      }
+      return dstTime;
+    };
+    kCommon.dstApplicable = kCommon.isUSDayLightSavingTime();
+    kCommon.adjustDSTDisplay = function() {
+      var cssStr = "";
+      if (kCommon.dstApplicable) {
+        cssStr = ".tzPlanner td.standard{color:#aeaeae;} .tzPlanner td.daylight{color:#000;font-weight:bold;}";
+        delete KTimeZone.est;
+        delete KTimeZone.cst;
+        delete KTimeZone.pst;
+      } else {
+        cssStr = ".tzPlanner td.standard{color:#000;font-weight:bold;} .tzPlanner td.daylight{color:#aeaeae;}";
+        delete KTimeZone.edt;
+        delete KTimeZone.cdt;
+        delete KTimeZone.pdt;
+      }
+      var cssStyle = document.createElement("style");
+      cssStyle.type = "text/css";
+      if (cssStyle.styleSheet) {
+        cssStyle.styleSheet.cssText = cssStr;
+      } else {
+        cssStyle.appendChild(document.createTextNode(cssStr));
+      }
+      document.getElementsByTagName("head")[0].appendChild(cssStyle);
+    };
+    window.KTimeZone = {
+      ist: {
+        label: "IST",
+        time: kCommon.baseTime - 0,
+        timezonetype: "standard-nondaylight"
+      },
+      est: {
+        label: "EST",
+        time: kCommon.baseTime - ((10 * kCommon.hour) + (30 * kCommon.minute)),
+        timezonetype: "standard"
+      },
+      edt: {
+        label: "EDT",
+        time: kCommon.baseTime - ((9 * kCommon.hour) + (30 * kCommon.minute)),
+        timezonetype: "daylight"
+      },
+      cst: {
+        label: "CST",
+        time: kCommon.baseTime - ((11 * kCommon.hour) + (30 * kCommon.minute)),
+        timezonetype: "standard"
+      },
+      cdt: {
+        label: "CDT",
+        time: kCommon.baseTime - ((10 * kCommon.hour) + (30 * kCommon.minute)),
+        timezonetype: "daylight"
+      },
+      pst: {
+        label: "PST",
+        time: kCommon.baseTime - ((13 * kCommon.hour) + (30 * kCommon.minute)),
+        timezonetype: "standard"
+      },
+      pdt: {
+        label: "PDT",
+        time: kCommon.baseTime - ((12 * kCommon.hour) + (30 * kCommon.minute)),
+        timezonetype: "daylight"
+      }
+    };
+    kCommon.adjustDSTDisplay();
+    var timezoneCount = 0;
+    for (var key in KTimeZone) {
+      timezoneCount++;
+    }
+    var generateTimeRows = function(interval) {
+      var count = 0;
+      var iLength = 0;
+      if (interval === "60min") {
+        count = 24;
+        iLength = 60;
+      } else if (interval === "30min") {
+        count = 48;
+        iLength = 30;
+      } else if (interval === "15min") {
+        count = 96;
+        iLength = 15;
+      }
+      var indiaTime = kCommon.getIndiaTime();
+      var markup = "<table class=\"tzPlanner\" align=\"center\">";
+      markup += "<tr>";
+      for (var obj in KTimeZone) {
+        markup += "<td class=\"colHead\"><div class=\"cellContent\">" + KTimeZone[obj].label + "</div></td>";
+      }
+      markup += "</tr>";
+      for (var i = 0; i < count; i++) {
+        markup += "<tr onmouseover=\"kCommon.highlightTimeRow(this);\" onmouseout=\"kCommon.unHighlightTimeRow(this);\">";
+        var indiaTimeRowEntry = new Date(KTimeZone["ist"].time + (i * iLength * kCommon.minute));
+        var timeRowEntryValue = kCommon.formatNum(indiaTimeRowEntry.getHours()) + "" + kCommon.formatNum(indiaTimeRowEntry.getMinutes());
+        var indiaTimeRowValue = kCommon.formatNum(indiaTime.hours) + "" + kCommon.formatNum(indiaTime.minutes);
+        var currentTimeClass = "";
+        if (iLength === 60) {
+          if (indiaTime.hours === indiaTimeRowEntry.getHours()) {
+            currentTimeClass = "currentTime";
+          }
+        } else {
+          if (parseInt(indiaTimeRowValue, 10) >= parseInt(timeRowEntryValue, 10) && (parseInt(indiaTimeRowValue, 10) - parseInt(timeRowEntryValue, 10)) < iLength) {
+            currentTimeClass = "currentTime";
+          }
+        }
+        for (var key in KTimeZone) {
+          markup += "<td class=\"" + KTimeZone[key].timezonetype + " " + currentTimeClass + "\"><div class=\"cellContent\">" + kCommon.displayTime(new Date(KTimeZone[key].time + (i * iLength * kCommon.minute))) + "<span class=\"tzLabel\"> (" + KTimeZone[key].label + ")</span></div></td>";
+        }
+        markup += "</tr>";
+      }
+      markup += "</table>";
+      return markup;
+    };
+    var updateTimeIntervalDisplay = function(val) {
+      document.getElementById("timezoneInformationContainer").innerHTML = generateTimeRows(val);
+      document.body.className = document.body.className;
+      makeUnselectable();
+    };
+    var setTimezoneInterval = function(elem) {
+      var val = elem[elem.selectedIndex].value;
+      updateTimeIntervalDisplay(val);
+    };
+    var dstBeginDate = kCommon.getSecondSundayInMarch();
+    var dstEndDate = kCommon.getFirstSundayInNovember();
+    var markup = "<span class=\"pageHead\">TimeZone Planner</span><br/><span>powered by <a href=\"https://www.ashishkumarkc.com\" target=\"_blank\">Ashish's Web</a></span><br/><br/>";
+    markup += "<table align=\"center\"><tr><td class=\"legend\">Time interval: <select name=\"timeInterval\" id=\"timeIntervalSelection\" onchange=\"setTimezoneInterval(this);\"><option value=\"60min\">Hour</option><option value=\"30min\">30 Minutes</option><option value=\"15min\">15 Minutes</option></select> &nbsp;&nbsp;Legend: <span class=\"dayindicator\">" + String.fromCharCode(9788) + " - Day</span> | <span class=\"nightindicator\">" + String.fromCharCode(9789) + " - Night</span><br/><br/>Daylight Saving Time begins: <b>March " + dstBeginDate.getDate() + ", " + dstBeginDate.getFullYear() + "</b> | Ends: <b>November " + dstEndDate.getDate() + ", " + dstEndDate.getFullYear() + "</b><br/><br/></td></tr></table>";
+    markup += "<div id=\"timezoneInformationContainer\"></div>";
+    document.getElementById("container").innerHTML = markup;
+    updateTimeIntervalDisplay("30min");
+    var timeIntervalSelection = document.getElementById("timeIntervalSelection");
+    setTimeout(function() {
+      timeIntervalSelection.selectedIndex = 1; /*Kludge for IE - Page refresh retains the previous select value*/
+    }, 11);
+  </script>
+  <script type="text/javascript">
+    var keyHandler = function(e) {
+      e = e || window.event;
+      e.keyCode = e.keyCode || e.which;
+      e.preventDefault();
+    };
+    var bodyElem = document.getElementsByTagName('body')[0];
+    if (bodyElem.attachEvent) {
+      bodyElem.attachEvent('onkeydown', keyHandler);
+    } else {
+      bodyElem.addEventListener('keydown', keyHandler, false);
+    }
+  </script>
+</body>
+
+</html>
+<!--
+@Utility-Version: - v1.2.1
+This utility has been authored by K.C.Ashish Kumar ( http://www.ashishkumarkc.com / http://www.kcak11.com )
+The information provided is generated programatically using a computer based algorithm and is intended for use "as is".
+
+Any unauthorized copy is prohibited.
+-->
